@@ -14,6 +14,28 @@ export const captureImage = async (webcamRef: React.RefObject<any>): Promise<str
   }
 };
 
+// Function to process an uploaded image file
+export const processUploadedImage = (file: File): Promise<string | null> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        resolve(e.target.result as string);
+      } else {
+        reject(new Error("Failed to read image file"));
+      }
+    };
+    
+    reader.onerror = (e) => {
+      console.error("Error reading file:", e);
+      reject(new Error("Error reading file"));
+    };
+    
+    reader.readAsDataURL(file);
+  });
+};
+
 // Function to convert base64 to file blob
 export const dataURLtoBlob = (dataURL: string): Blob => {
   const byteString = atob(dataURL.split(',')[1]);

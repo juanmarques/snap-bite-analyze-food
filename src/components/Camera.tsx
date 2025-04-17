@@ -1,9 +1,10 @@
 
 import React, { useRef, useState } from 'react';
 import Webcam from 'react-webcam';
-import { captureImage } from '../utils/imageProcessing';
+import { captureImage, processUploadedImage } from '../utils/imageProcessing';
 import { Button } from '@/components/ui/button';
-import { Camera as CameraIcon, RefreshCcw } from 'lucide-react';
+import { Camera as CameraIcon, RefreshCcw, Upload } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CameraProps {
   onImageCapture: (imageSrc: string) => void;
@@ -11,8 +12,10 @@ interface CameraProps {
 
 const Camera: React.FC<CameraProps> = ({ onImageCapture }) => {
   const webcamRef = useRef<Webcam>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isCaptured, setIsCaptured] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   const handleCapture = async () => {
     const capturedImage = await captureImage(webcamRef);
@@ -23,9 +26,30 @@ const Camera: React.FC<CameraProps> = ({ onImageCapture }) => {
     }
   };
 
+  const handleUpload = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const processedImage = await processUploadedImage(file);
+      if (processedImage) {
+        setImageSrc(processedImage);
+        setIsCaptured(true);
+        onImageCapture(processedImage);
+      }
+    }
+  };
+
   const handleRetake = () => {
     setIsCaptured(false);
     setImageSrc(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const videoConstraints = {
@@ -56,12 +80,27 @@ const Camera: React.FC<CameraProps> = ({ onImageCapture }) => {
 
       <div className="mt-4 flex gap-4">
         {!isCaptured ? (
-          <Button 
-            onClick={handleCapture} 
-            className="btn-primary"
-          >
-            <CameraIcon className="mr-2 h-4 w-4" /> Capture Food
-          </Button>
+          <>
+            <Button 
+              onClick={handleCapture} 
+              className="btn-primary"
+            >
+              <CameraIcon className="mr-2 h-4 w-4" /> {isMobile ? 'Capture Food' : 'Take Photo'}
+            </Button>
+            <Button 
+              onClick={handleUpload} 
+              variant="outline"
+            >
+              <Upload className="mr-2 h-4 w-4" /> Upload Image
+            </Button>
+            <input 
+              type="file" 
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              className="hidden"
+            />
+          </>
         ) : (
           <Button 
             onClick={handleRetake} 

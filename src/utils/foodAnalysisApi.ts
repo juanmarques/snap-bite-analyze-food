@@ -3,7 +3,7 @@ import { FoodItem } from '../types/food';
 
 // Gemini API configuration
 const GEMINI_API_KEY = 'AIzaSyBWBGu5YR_DsIvhwQ7TfOPsD0PLGm_GBb8';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro-vision-latest:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent';
 
 interface FoodAnalysisResult {
   success: boolean;
@@ -59,7 +59,7 @@ export const analyzeFood = async (imageBlob: Blob): Promise<FoodAnalysisResult> 
           ]
         }
       ],
-      generation_config: {
+      generationConfig: {
         temperature: 0.2,
         top_p: 0.8,
         top_k: 40,
@@ -67,6 +67,8 @@ export const analyzeFood = async (imageBlob: Blob): Promise<FoodAnalysisResult> 
       }
     };
 
+    console.log('Calling Gemini API with URL:', GEMINI_API_URL);
+    
     // Call Gemini API
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
@@ -77,15 +79,17 @@ export const analyzeFood = async (imageBlob: Blob): Promise<FoodAnalysisResult> 
     });
 
     if (!response.ok) {
+      console.error('API error response:', response.status, response.statusText);
       throw new Error(`API request failed with status ${response.status}`);
     }
 
     const result = await response.json();
+    console.log('Gemini API response:', result);
     
     // Parse the response from Gemini
     try {
       // Extract the text from the response
-      const responseText = result.candidates[0]?.content?.parts?.[0]?.text;
+      const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
       
       if (!responseText) {
         throw new Error('No text content in response');

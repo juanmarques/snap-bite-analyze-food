@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { dataURLtoBlob } from '../utils/imageProcessing';
+import { dataURLtoBlob, compressImage } from '../utils/imageProcessing';
 import { analyzeFood } from '../utils/foodAnalysisApi';
 import { FoodItem, FoodLog as FoodLogType } from '../types/food';
 import Camera from '../components/Camera';
@@ -10,6 +10,7 @@ import Statistics from '../components/Statistics';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Camera as CameraIcon } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -17,6 +18,7 @@ const Index = () => {
   const [detectedFoods, setDetectedFoods] = useState<FoodItem[]>([]);
   const [foodLogs, setFoodLogs] = useState<FoodLogType[]>([]);
   const [activeTab, setActiveTab] = useState('camera');
+  const { toast } = useToast();
   
   // Handle image capture from camera
   const handleImageCapture = (capturedImage: string) => {
@@ -24,19 +26,40 @@ const Index = () => {
     analyzeFoodImage(capturedImage);
   };
   
-  // Analyze food image using mock API
+  // Analyze food image using Gemini AI
   const analyzeFoodImage = async (imageSource: string) => {
     setIsAnalyzing(true);
+    toast({
+      title: "Analyzing food...",
+      description: "Our AI is identifying your meal. This may take a moment.",
+    });
+    
     try {
-      const imageBlob = dataURLtoBlob(imageSource);
+      // Compress the image before sending to API
+      const compressedImage = await compressImage(imageSource);
+      const imageBlob = dataURLtoBlob(compressedImage);
       const result = await analyzeFood(imageBlob);
       
       if (result.success && result.foodItems.length > 0) {
         setDetectedFoods(result.foodItems);
+        toast({
+          title: "Analysis complete!",
+          description: `Identified ${result.foodItems.length} food items.`,
+        });
       } else {
+        toast({
+          variant: "destructive",
+          title: "Analysis failed",
+          description: result.error || "Could not identify food in image.",
+        });
         console.error("Food analysis failed:", result.error);
       }
     } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error analyzing food",
+        description: "Please try again or upload a different image.",
+      });
       console.error("Error analyzing food:", error);
     } finally {
       setIsAnalyzing(false);
@@ -69,6 +92,11 @@ const Index = () => {
       setDetectedFoods([]);
       setImageSrc(null);
       setActiveTab('history');
+      
+      toast({
+        title: "Food log saved!",
+        description: `Added ${detectedFoods.length} items to your food log.`,
+      });
     }
   };
   

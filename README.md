@@ -1,8 +1,8 @@
-# Welcome to your Lovable project
+# FoodLens
 
-## Project info
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**URL**: https://lovable.dev/projects/08c35439-b476-4de5-a720-35d206a1ae2f
+AI-powered food analysis app -- snap a photo, get nutritional insights.
 
 ## How can I edit this code?
 

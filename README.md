@@ -2,72 +2,65 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-AI-powered food analysis app -- snap a photo, get nutritional insights.
+AI-powered food analysis app -- snap a photo of your meal or upload an image, and get instant nutritional breakdown powered by Google Gemini Vision.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- **Camera Capture** -- Take photos directly from your webcam
+- **Image Upload** -- Upload existing food photos (max 10MB)
+- **AI Food Recognition** -- Google Gemini Vision identifies food items and estimates macros
+- **Nutritional Breakdown** -- Calories, protein, carbs, and fat per detected item
+- **Food Log** -- Save analyzed meals with auto-detected meal type (breakfast/lunch/dinner/snack)
+- **Daily Statistics** -- Calorie tracking and meal distribution bar chart
+- **Image Compression** -- Client-side resize (max 800px width) before API submission
 
-**Use Lovable**
+## Tech Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/08c35439-b476-4de5-a720-35d206a1ae2f) and start prompting.
+| Layer | Technology |
+|-------|-----------|
+| Framework | React 18 + TypeScript |
+| Build | Vite 5 (SWC) |
+| Styling | Tailwind CSS + shadcn/ui |
+| Charts | Recharts |
+| Camera | react-webcam |
+| State | TanStack React Query |
+| AI | Google Gemini Vision API |
 
-Changes made via Lovable will be committed automatically to this repo.
+## Quick Start
 
-**Use your preferred IDE**
+```bash
+# Install dependencies
+npm install
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start dev server
 npm run dev
+# Opens at http://localhost:8080
+
+# Build for production
+npm run build
 ```
 
-**Edit a file directly in GitHub**
+### API Key Setup
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+The app uses Google Gemini Vision for food recognition. Configure your API key in `src/config/apiConfig.ts`.
 
-**Use GitHub Codespaces**
+Get a free key at [Google AI Studio](https://makersuite.google.com/app/apikey).
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## How It Works
 
-## What technologies are used for this project?
+1. Capture or upload a food photo
+2. Image is compressed and sent as base64 to Gemini Vision API
+3. Gemini returns structured JSON with detected foods and estimated macros
+4. Results display with per-item calorie/macro breakdown
+5. Save to food log (in-memory, resets on page refresh)
 
-This project is built with:
+## Limitations
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- Food log is client-side only (no backend persistence)
+- Nutritional estimates are AI-generated approximations
+- Requires webcam permission for camera capture
+- Gemini API rate limits apply
 
-## How can I deploy this project?
+## License
 
-Simply open [Lovable](https://lovable.dev/projects/08c35439-b476-4de5-a720-35d206a1ae2f) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is licensed under the MIT License -- see the [LICENSE](LICENSE) file for details.

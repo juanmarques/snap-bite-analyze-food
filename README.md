@@ -28,17 +28,37 @@ AI-powered food analysis app -- snap a photo of your meal or upload an image, an
 
 ## Quick Start
 
+### Local Development
+
+From the repository root, with Node.js and npm installed, use the factory-proven dependency preparation below. `--legacy-peer-deps` is required for compatibility with the existing lockfile's legacy peer resolution; keep the lockfile unchanged.
+
 ```bash
 # Install dependencies
-npm install
+npm ci --ignore-scripts --no-audit --no-fund --legacy-peer-deps
 
 # Start dev server
 npm run dev
-# Opens at http://localhost:8080
+# Open the local URL printed by Vite
 
 # Build for production
 npm run build
+
+# Check application TypeScript without emitting files
+node node_modules/typescript/bin/tsc --noEmit -p tsconfig.app.json
+
+# Preview the production build locally (run the build first)
+npm run preview
 ```
+
+### Manual Camera Fallback Check
+
+With the local app open, verify the following without capturing or uploading a photo or invoking food analysis:
+
+1. Deny camera access when prompted, or block camera permission for the local site and reload.
+2. Confirm a useful "Camera unavailable" error explains that permission may be denied or the camera may be missing or in use, and points to **Upload Image**.
+3. Confirm the capture button (**Take Photo**, or **Capture Food** on mobile) is disabled.
+4. Confirm **Upload Image** remains enabled and opens the image file chooser. Cancel the chooser without selecting a file.
+5. Confirm history navigation remains usable, then return to the camera view.
 
 ### API Key Setup
 

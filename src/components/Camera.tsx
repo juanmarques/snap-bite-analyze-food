@@ -15,11 +15,19 @@ const Camera: React.FC<CameraProps> = ({ onImageCapture }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isCaptured, setIsCaptured] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [isCameraReady, setIsCameraReady] = useState(false);
+  const [cameraError, setCameraError] = useState(false);
+  const cameraSessionRef = useRef(0);
+  const cameraSession = cameraSessionRef.current;
   const isMobile = useIsMobile();
 
   const handleCapture = async () => {
+    if (!isCameraReady || cameraError) return;
+
     const capturedImage = await captureImage(webcamRef);
     if (capturedImage) {
+      cameraSessionRef.current += 1;
+      setIsCameraReady(false);
       setImageSrc(capturedImage);
       setIsCaptured(true);
       onImageCapture(capturedImage);
@@ -37,6 +45,8 @@ const Camera: React.FC<CameraProps> = ({ onImageCapture }) => {
     if (file) {
       const processedImage = await processUploadedImage(file);
       if (processedImage) {
+        cameraSessionRef.current += 1;
+        setIsCameraReady(false);
         setImageSrc(processedImage);
         setIsCaptured(true);
         onImageCapture(processedImage);
@@ -45,6 +55,9 @@ const Camera: React.FC<CameraProps> = ({ onImageCapture }) => {
   };
 
   const handleRetake = () => {
+    cameraSessionRef.current += 1;
+    setIsCameraReady(false);
+    setCameraError(false);
     setIsCaptured(false);
     setImageSrc(null);
     if (fileInputRef.current) {
@@ -67,6 +80,17 @@ const Camera: React.FC<CameraProps> = ({ onImageCapture }) => {
             ref={webcamRef}
             screenshotFormat="image/jpeg"
             videoConstraints={videoConstraints}
+            onUserMedia={() => {
+              // Ignore callbacks from a camera replaced by upload or retake.
+              if (cameraSession !== cameraSessionRef.current) return;
+              setCameraError(false);
+              setIsCameraReady(true);
+            }}
+            onUserMediaError={() => {
+              if (cameraSession !== cameraSessionRef.current) return;
+              setIsCameraReady(false);
+              setCameraError(true);
+            }}
             className="w-full h-full object-cover"
           />
         ) : (
@@ -78,11 +102,19 @@ const Camera: React.FC<CameraProps> = ({ onImageCapture }) => {
         )}
       </div>
 
-      <div className="mt-4 flex gap-4">
+      {!isCaptured && cameraError && (
+        <p role="alert" className="mt-4 w-full max-w-lg text-sm text-destructive">
+          Camera unavailable. Camera permission may be denied, or your camera may
+          be missing or in use. You can still use Upload Image to choose a photo.
+        </p>
+      )}
+
+      <div className="mt-4 flex flex-wrap justify-center gap-4">
         {!isCaptured ? (
           <>
             <Button 
               onClick={handleCapture} 
+              disabled={!isCameraReady || cameraError}
               className="btn-primary"
             >
               <CameraIcon className="mr-2 h-4 w-4" /> {isMobile ? 'Capture Food' : 'Take Photo'}
@@ -98,6 +130,7 @@ const Camera: React.FC<CameraProps> = ({ onImageCapture }) => {
               ref={fileInputRef}
               onChange={handleFileChange}
               accept="image/*"
+              aria-label="Upload Image"
               className="hidden"
             />
           </>
